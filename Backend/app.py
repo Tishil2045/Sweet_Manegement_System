@@ -127,3 +127,17 @@ def purchase_sweet(sweet_id):
     sweet.quantity -= 1
     db.session.commit()
     return jsonify(sweet.to_dict()), 200
+
+@app.route('/sweets/<int:sweet_id>/restock', methods=['POST'])
+def restock_sweet(sweet_id):
+    sweet = Sweet.query.get(sweet_id)
+    if not sweet:
+        return jsonify({"error": "Sweet not found"}), 404
+
+    sweet.quantity += 1
+    db.session.commit()
+    return jsonify(sweet.to_dict()), 200
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
