@@ -64,3 +64,8 @@ def add_sweet():
     db.session.commit()
 
     return jsonify(new_sweet.to_dict()), 201
+
+@app.route('/sweets', methods=['GET'])
+def get_sweets():
+    sweets = Sweet.query.all()
+    return jsonify([s.to_dict() for s in sweets]), 200
