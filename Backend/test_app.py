@@ -150,3 +150,25 @@ class SweetShopTestCase(unittest.TestCase):
         response = client.post('/sweets/9999/purchase')
         assert response.status_code == 404
         assert "Sweet not found" in response.get_json()['error']
+
+    def test_restock_sweet():
+        app.config['TESTING'] = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        client = app.test_client()
+
+        with app.app_context():
+            db.create_all()
+            sweet = Sweet(name="Barfi", price=40.0, quantity=3, category="Milk")
+            db.session.add(sweet)
+            db.session.commit()
+            sweet_id = sweet.id
+
+        # Case 1: Successful restock
+        response = client.post(f'/sweets/{sweet_id}/restock')
+        assert response.status_code == 200
+        assert response.get_json()['quantity'] == 4
+
+        # Case 2: Invalid sweet ID
+        response = client.post('/sweets/9999/restock')
+        assert response.status_code == 404
+        assert "Sweet not found" in response.get_json()['error']
