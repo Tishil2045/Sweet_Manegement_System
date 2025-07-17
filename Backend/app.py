@@ -115,3 +115,15 @@ def search_sweets():
 
     results = query.all()
     return jsonify([s.to_dict() for s in results]), 200
+
+@app.route('/sweets/<int:sweet_id>/purchase', methods=['POST'])
+def purchase_sweet(sweet_id):
+    sweet = Sweet.query.get(sweet_id)
+    if not sweet:
+        return jsonify({"error": "Sweet not found"}), 404
+    if sweet.quantity < 1:
+        return jsonify({"error": "Out of stock"}), 400
+
+    sweet.quantity -= 1
+    db.session.commit()
+    return jsonify(sweet.to_dict()), 200
