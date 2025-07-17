@@ -65,3 +65,28 @@ class SweetShopTestCase(unittest.TestCase):
         with app.app_context():
             deleted = Sweet.query.get(sweet_id)
             self.assertIsNone(deleted)
+
+    def test_update_sweet(self):
+        # First, add a sweet to update
+        sweet = Sweet(name="Rasgulla", category="Milk-Based", price=20, quantity=30)
+        with app.app_context():
+            db.session.add(sweet)
+            db.session.commit()
+            sweet_id = sweet.id
+
+        # Data to update
+        updated_data = {
+            "name": "Rasgulla Deluxe",
+            "category": "Milk-Based",
+            "price": 25,
+            "quantity": 50
+        }
+
+        # Call the update API
+        response = self.client.put(f'/sweets/{sweet_id}', json=updated_data)
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+
+        self.assertEqual(data['name'], "Rasgulla Deluxe")
+        self.assertEqual(data['price'], 25)
+        self.assertEqual(data['quantity'], 50)
