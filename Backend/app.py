@@ -69,3 +69,13 @@ def add_sweet():
 def get_sweets():
     sweets = Sweet.query.all()
     return jsonify([s.to_dict() for s in sweets]), 200
+
+@app.route('/sweets/<int:sweet_id>', methods=['DELETE'])
+def delete_sweet(sweet_id):
+    sweet = Sweet.query.get(sweet_id)
+    if not sweet:
+        return jsonify({"error": "Sweet not found"}), 404
+
+    db.session.delete(sweet)
+    db.session.commit()
+    return jsonify({"message": "Sweet deleted"}), 200
