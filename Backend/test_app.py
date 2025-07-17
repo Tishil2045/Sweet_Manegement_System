@@ -118,3 +118,35 @@ class SweetShopTestCase(unittest.TestCase):
         response = self.client.get('/sweets/search?min_price=35&max_price=55')
         data = response.get_json()
         self.assertEqual(len(data), 2)
+
+    def test_purchase_sweet():
+        app.config['TESTING'] = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        client = app.test_client()
+
+        with app.app_context():
+            db.create_all()
+            sweet = Sweet(name="Kaju Katli", price=50.0, quantity=2, category="Dry Fruit")
+            db.session.add(sweet)
+            db.session.commit()
+            sweet_id = sweet.id
+
+        # Case 1: Successful purchase
+        response = client.post(f'/sweets/{sweet_id}/purchase')
+        assert response.status_code == 200
+        assert response.get_json()['quantity'] == 1
+
+        # Case 2: Out of stock
+        with app.app_context():
+            sweet = Sweet.query.get(sweet_id)
+            sweet.quantity = 0
+            db.session.commit()
+
+        response = client.post(f'/sweets/{sweet_id}/purchase')
+        assert response.status_code == 400
+        assert "Out of stock" in response.get_json()['error']
+
+        # Case 3: Invalid sweet ID
+        response = client.post('/sweets/9999/purchase')
+        assert response.status_code == 404
+        assert "Sweet not found" in response.get_json()['error']
