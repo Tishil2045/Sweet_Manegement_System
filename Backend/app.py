@@ -79,3 +79,18 @@ def delete_sweet(sweet_id):
     db.session.delete(sweet)
     db.session.commit()
     return jsonify({"message": "Sweet deleted"}), 200
+
+@app.route('/sweets/<int:sweet_id>', methods=['PUT'])
+def update_sweet(sweet_id):
+    sweet = Sweet.query.get(sweet_id)
+    if not sweet:
+        return jsonify({"error": "Sweet not found"}), 404
+
+    data = request.get_json()
+    sweet.name = data.get("name", sweet.name)
+    sweet.category = data.get("category", sweet.category)
+    sweet.price = data.get("price", sweet.price)
+    sweet.quantity = data.get("quantity", sweet.quantity)
+
+    db.session.commit()
+    return jsonify(sweet.to_dict()), 200
