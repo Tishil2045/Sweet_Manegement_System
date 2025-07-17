@@ -90,3 +90,31 @@ class SweetShopTestCase(unittest.TestCase):
         self.assertEqual(data['name'], "Rasgulla Deluxe")
         self.assertEqual(data['price'], 25)
         self.assertEqual(data['quantity'], 50)
+
+    def test_search_sweets(self):
+        # Add sample sweets
+        with app.app_context():
+            db.session.add_all([
+                Sweet(name="Kaju Katli", category="Nut-Based", price=50, quantity=10),
+                Sweet(name="Gulab Jamun", category="Milk-Based", price=30, quantity=15),
+                Sweet(name="Gajar Halwa", category="Vegetable-Based", price=40, quantity=20)
+            ])
+            db.session.commit()
+
+        # Search by partial name
+        response = self.client.get('/sweets/search?name=kaju')
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['name'], "Kaju Katli")
+
+        # Search by category
+        response = self.client.get('/sweets/search?category=Milk-Based')
+        data = response.get_json()
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['name'], "Gulab Jamun")
+
+        # Search by price range
+        response = self.client.get('/sweets/search?min_price=35&max_price=55')
+        data = response.get_json()
+        self.assertEqual(len(data), 2)
