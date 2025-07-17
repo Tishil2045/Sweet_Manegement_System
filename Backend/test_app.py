@@ -47,3 +47,21 @@ class SweetShopTestCase(unittest.TestCase):
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0]["name"], "Kaju Katli")
         self.assertEqual(data[1]["name"], "Gulab Jamun")
+
+    def test_delete_sweet(self):
+        # Add a sweet to delete
+        sweet = Sweet(name="Jalebi", category="Sugar-Based", price=25, quantity=15)
+        with app.app_context():
+            db.session.add(sweet)
+            db.session.commit()
+            sweet_id = sweet.id
+
+        # Delete the sweet
+        response = self.client.delete(f'/sweets/{sweet_id}')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), {"message": "Sweet deleted"})
+
+        # Confirm it no longer exists
+        with app.app_context():
+            deleted = Sweet.query.get(sweet_id)
+            self.assertIsNone(deleted)
