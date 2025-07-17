@@ -94,3 +94,24 @@ def update_sweet(sweet_id):
 
     db.session.commit()
     return jsonify(sweet.to_dict()), 200
+
+@app.route('/sweets/search', methods=['GET'])
+def search_sweets():
+    name = request.args.get('name', '').lower()
+    category = request.args.get('category', '').lower()
+    min_price = request.args.get('min_price', type=float)
+    max_price = request.args.get('max_price', type=float)
+
+    query = Sweet.query
+
+    if name:
+        query = query.filter(Sweet.name.ilike(f"%{name}%"))
+    if category:
+        query = query.filter(Sweet.category.ilike(f"%{category}%"))
+    if min_price is not None:
+        query = query.filter(Sweet.price >= min_price)
+    if max_price is not None:
+        query = query.filter(Sweet.price <= max_price)
+
+    results = query.all()
+    return jsonify([s.to_dict() for s in results]), 200
