@@ -1,0 +1,43 @@
+
+.nav-ul li{
+  display: inline-block;
+  margin: 0 10px;
+}
+.nav-ul li a{
+  text-decoration: none;
+  color: #61dafb;
+  padding: 5px;
+}
+.nav-ul {
+  padding: 5px;
+  margin: 0;
+  list-style: none;
+  background-color: #282c34;
+  border-radius: 5px;
+  /* position: fixed; */
+  top: 0;
+  left: 0;
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}

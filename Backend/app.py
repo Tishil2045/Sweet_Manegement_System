@@ -121,12 +121,25 @@ def purchase_sweet(sweet_id):
     sweet = Sweet.query.get(sweet_id)
     if not sweet:
         return jsonify({"error": "Sweet not found"}), 404
-    if sweet.quantity < 1:
-        return jsonify({"error": "Out of stock"}), 400
 
-    sweet.quantity -= 1
+    data = request.get_json()
+    quantity_to_purchase = data.get('quantity', 0)
+
+    if not isinstance(quantity_to_purchase, int) or quantity_to_purchase <= 0:
+        return jsonify({"error": "Invalid purchase quantity"}), 400
+
+    if sweet.quantity < quantity_to_purchase:
+        return jsonify({"error": "Not enough stock"}), 400
+
+    sweet.quantity -= quantity_to_purchase
     db.session.commit()
-    return jsonify(sweet.to_dict()), 200
+
+    return jsonify({
+        "message": "Purchase successful",
+        "remaining_quantity": sweet.quantity,
+        "sweet": sweet.to_dict()
+    }), 200
+
 
 @app.route('/sweets/<int:sweet_id>/restock', methods=['POST'])
 def restock_sweet(sweet_id):
@@ -134,9 +147,21 @@ def restock_sweet(sweet_id):
     if not sweet:
         return jsonify({"error": "Sweet not found"}), 404
 
-    sweet.quantity += 1
+    data = request.get_json()
+    quantity_to_add = data.get('quantity', 0)
+
+    if not isinstance(quantity_to_add, int) or quantity_to_add <= 0:
+        return jsonify({"error": "Invalid restock quantity"}), 400
+
+    sweet.quantity += quantity_to_add
     db.session.commit()
-    return jsonify(sweet.to_dict()), 200
+
+    return jsonify({
+        "message": "Restock successful",
+        "new_quantity": sweet.quantity,
+        "sweet": sweet.to_dict()
+    }), 200
+
 
 
 if __name__ == '__main__':
