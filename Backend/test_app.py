@@ -30,3 +30,20 @@ class SweetShopTestCase(unittest.TestCase):
         self.assertEqual(data['category'], "Nut-Based")
         self.assertEqual(data['price'], 50)
         self.assertEqual(data['quantity'], 20)
+
+    def test_view_all_sweets(self):
+        # Add a couple of sweets to the database first
+        sweet1 = Sweet(name="Kaju Katli", category="Nut-Based", price=50, quantity=20)
+        sweet2 = Sweet(name="Gulab Jamun", category="Milk-Based", price=30, quantity=10)
+
+        with app.app_context():
+            db.session.add_all([sweet1, sweet2])
+            db.session.commit()
+
+        # Call the GET endpoint
+        response = self.client.get('/sweets')
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]["name"], "Kaju Katli")
+        self.assertEqual(data[1]["name"], "Gulab Jamun")
